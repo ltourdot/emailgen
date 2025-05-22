@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ChatGPT - Email Response Generator V10</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="https://chat.openai.com/favicon.ico">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; padding: 30px; color: #333; }
+    h1 { text-align: center; color: #007acc; }
+    section { margin-bottom: 24px; }
+    label { font-weight: bold; display: block; margin-bottom: 4px; }
+    textarea, select { width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; }
+    small { font-size: 12px; color: #555; display: block; margin-top: 4px; }
+    .tag-section { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+    .tag-section label { font-weight: normal; display: flex; align-items: center; gap: 4px; }
+    button { background: #007acc; color: #fff; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; margin-top: 20px; }
+    button:hover { background: #005fa3; }
+    .copy-confirmation { margin-top: 10px; color: green; font-weight: bold; display: none; }
+    [title] { border-bottom: 1px dotted #999; cursor: help; }
+  </style>
+</head>
+<body>
+  <h1>ChatGPT - Email Response Generator V10</h1>
+  <form onsubmit="generatePrompt(); return false;">
+    <section>
+      <label for="email">Original Email or Summary <small>(Paste entire chain if available)</small></label>
+      <textarea id="email" rows="5"></textarea>
+    </section>
+    <section>
+      <label for="reaction">Notes or Initial Reaction</label>
+      <textarea id="reaction" rows="2"></textarea>
+      <div class="tag-section">
+        <label title="You agree with the direction and just need to close the loop.">
+          <input type="checkbox" class="reaction-tag" value="✅ Agree with direction" checked> Agree
+        </label>
+        <label title="You need more details or data before responding fully.">
+          <input type="checkbox" class="reaction-tag" value="❓ Need more information"> Need info
+        </label>
+        <label title="The topic needs verbal clarity—suggest a quick meeting.">
+          <input type="checkbox" class="reaction-tag" value="🔄 Meeting or clarification needed"> Meeting
+        </label>
+        <label title="The direction seems off or not feasible.">
+          <input type="checkbox" class="reaction-tag" value="🚫 Misaligned / Not feasible"> Misaligned
+        </label>
+        <label title="You must weigh in personally before a decision is made.">
+          <input type="checkbox" class="reaction-tag" value="📌 Requires my input"> My input
+        </label>
+        <label title="You plan to delegate the reply or action to someone else.">
+          <input type="checkbox" class="reaction-tag" value="🔁 Can be delegated"> Delegate
+        </label>
+      </div>
+    </section>
+    <section>
+      <label>Audience</label>
+      <div class="tag-section">
+        <label title="Executive-level communication (e.g., CFO, CEO).">
+          <input type="checkbox" class="audience-tag" value="C-Suite" checked> C-Suite
+        </label>
+        <label title="Legal, HR, or compliance partner. Requires clarity and risk mitigation.">
+          <input type="checkbox" class="audience-tag" value="Legal"> Legal
+        </label>
+        <label title="Operational or functional leader. Keep it clear and actionable.">
+          <input type="checkbox" class="audience-tag" value="Ops"> Ops
+        </label>
+        <label title="Cross-functional peer. Aim for collaboration.">
+          <input type="checkbox" class="audience-tag" value="Peer"> Peer
+        </label>
+        <label title="Vendor, partner, or client. Maintain a professional tone.">
+          <input type="checkbox" class="audience-tag" value="External"> External
+        </label>
+        <label title="Internal team member or direct report. Empower with clarity.">
+          <input type="checkbox" class="audience-tag" value="Team Member"> Team
+        </label>
+      </div>
+    </section>
+    <section>
+      <label for="tone">Tone</label>
+      <select id="tone">
+        <option value="Direct">Direct</option>
+        <option value="Empathetic">Empathetic</option>
+        <option value="Diplomatic">Diplomatic</option>
+        <option value="Formal">Formal</option>
+        <option value="Urgent">Urgent</option>
+        <option value="Neutral">Neutral</option>
+      </select>
+    </section>
+    <section>
+      <label for="urgency">Urgency</label>
+      <select id="urgency">
+        <option value="Normal">Normal</option>
+        <option value="Low Priority">Low Priority</option>
+        <option value="Respond within 24 hours">Respond within 24 hours</option>
+        <option value="Urgent – Same Day">Urgent – Same Day</option>
+      </select>
+    </section>
+    <section>
+      <label for="objective">Core Objective</label>
+      <textarea id="objective" rows="2"></textarea>
+    </section>
+    <section>
+      <label for="cta">Call to Action</label>
+      <textarea id="cta" rows="2"></textarea>
+    </section>
+    <section>
+      <label for="keypoints">Key Points from Attachments</label>
+      <textarea id="keypoints" rows="2"></textarea>
+    </section>
+    <section>
+      <label>Risks / Sensitivities</label>
+      <div class="tag-section">
+        <label title="Legal exposure, compliance concerns, or HR sensitivity.">
+          <input type="checkbox" class="risks-tag" value="Legal"> Legal
+        </label>
+        <label title="May affect executive optics or visibility.">
+          <input type="checkbox" class="risks-tag" value="Exec optics"> Exec optics
+        </label>
+        <label title="Potential for cross-team friction or misalignment.">
+          <input type="checkbox" class="risks-tag" value="Cross-functional tension"> Cross-functional
+        </label>
+        <label title="Timing, bandwidth, or delivery risks.">
+          <input type="checkbox" class="risks-tag" value="Bandwidth"> Bandwidth
+        </label>
+        <label title="Previous history, politics, or emotional charge.">
+          <input type="checkbox" class="risks-tag" value="Contextual sensitivity"> Contextual
+        </label>
+      </div>
+    </section>
+    <section>
+      <label>Avoid Including These in the Reply <small>Check anything you want ChatGPT to explicitly leave out.</small></label>
+      <div class="tag-section">
+        <label title="Avoid unclear or evasive language unless softening tone intentionally.">
+          <input type="checkbox" class="avoid-tag" value="Vague" checked> Vague
+        </label>
+        <label title="Avoid taking on unnecessary responsibility. Useful only for optics or shielding team.">
+          <input type="checkbox" class="avoid-tag" value="Over-owning" checked> Over-owning
+        </label>
+        <label title="Avoid promising things that may not be deliverable.">
+          <input type="checkbox" class="avoid-tag" value="Over-promising" checked> Over-promising
+        </label>
+        <label title="Avoid excess detail if the audience is executive or external.">
+          <input type="checkbox" class="avoid-tag" value="Detail overload" checked> Detail overload
+        </label>
+        <label title="Avoid language that creates confusion or leads to rework.">
+          <input type="checkbox" class="avoid-tag" value="Rework risk" checked> Rework risk
+        </label>
+      </div>
+    </section>
+    <section>
+      <label><input type="checkbox" id="longThread"> 🧵 I’ve included part of a longer email chain (3+ exchanges)</label><br>
+      <label><input type="checkbox" id="trainingMode"> 🧠 Training Mode (adds writing guidance)</label>
+    </section>
+    <button type="submit">📋 Copy Prompt & Open ChatGPT</button>
+    <p class="copy-confirmation" id="copyNotice">✅ Prompt copied to clipboard!</p>
+  </form>
+  <script>
+    function generatePrompt() {
+      const getVals = (cls) => [...document.querySelectorAll("." + cls + ":checked")].map(cb => cb.value).join(", ");
+      const prompt = `Email Response Request
+Reaction Tags: ${getVals("reaction-tag")}
+Audience: ${getVals("audience-tag")}
+Tone: ${document.getElementById("tone").value}
+Urgency: ${document.getElementById("urgency").value}
+Risks: ${getVals("risks-tag")}
+Avoid: ${getVals("avoid-tag")}
+
+1. Summary of Original Email:
+${document.getElementById("email").value}
+
+2. Notes or Reaction:
+${document.getElementById("reaction").value}
+
+3. Core Objective:
+${document.getElementById("objective").value}
+
+4. Call to Action:
+${document.getElementById("cta").value}
+
+5. Key Points from Attachments:
+${document.getElementById("keypoints").value}
+
+${document.getElementById("longThread").checked ? "The email thread appears lengthy. If appropriate, suggest moving to a brief meeting." : ""}
+${document.getElementById("trainingMode").checked ? "Training Mode: Annotate the response to explain writing best practices." : ""}
+
+Respond with a concise email (~100 words max) that leads with the key message, maintains clarity, and fits the selected tone and audience. Use short paragraphs. Recommend a call if the thread is inefficient.`;
+
+      navigator.clipboard.writeText(prompt).then(() => {
+        document.getElementById("copyNotice").style.display = "block";
+        setTimeout(() => document.getElementById("copyNotice").style.display = "none", 3000);
+        window.open("https://chat.openai.com", "_blank");
+      });
+    }
+  </script>
+</body>
+</html>
